@@ -13,7 +13,7 @@ from clam_funcs.utils.file_utils import save_pkl, load_pkl
 from clam_funcs.utils.utils import *
 from clam_funcs.dataset_generic import Generic_MIL_Dataset
 from model.eval_utils import Accuracy_Logger
-from model.model_utils_common import get_classifier
+from model.model_utils_common import get_classifier, get_embed_dim
 
 
 def get_results_for_fold(model, eval_data, f, args):
@@ -26,7 +26,7 @@ def get_results_for_fold(model, eval_data, f, args):
         #if a splits dir is being passed assume we want to evaluate on all folds
         #get correct validation fold
         _, eval_data, _ = eval_data.return_splits(csv_path=f'{args.split_dir}/split_{f}.csv')
-    eval_data.load_from_h5(args.use_h5)
+    eval_data.load_from_h5(True)
     eval_loader = get_split_loader(eval_data,training=False)
     results_dict,acc_logger ,(val_error, val_auc, val_f1, val_mcc) = summary(model, eval_loader, args.n_class,args.case_level)
     #filename = f'output/slide_level_preds/{args.exp_code}/split_{f}_results.pkl'
@@ -101,17 +101,18 @@ parser.add_argument('--eval_data_csv', type=str, default=None,
                     help='csv of items to be evaluated on')
 parser.add_argument('--split_dir', type=str, default=None, 
                     help='splits')
-parser.add_argument('--embed_dim', type=int, default=1024)
+parser.add_argument('--embedder', type=str, default='uni_v1')
 parser.add_argument('--k', type=int, default=5, help='number of folds (default: 10)')
 parser.add_argument('--checkpoint_dir', default='./results', help='results directory (default: ./results)')
 parser.add_argument('--exp_code', type=str, help='experiment code for saving results')
 parser.add_argument('--case_level',default=False,action='store_true')
-parser.add_argument('--use_h5', action="store_true",default=False)
 parser.add_argument('--model_type', type=str,default="TODO")
 parser.add_argument('--augments', nargs='+', help='which augmentations to use (for none use og)', required=True)
 args = parser.parse_args()
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+args.data_dir+=os.sep+args.embedder
+args.embed_dim = get_embed_dim()
 
 
 if __name__ == "__main__":

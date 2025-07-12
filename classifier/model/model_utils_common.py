@@ -37,6 +37,14 @@ def get_classifier(args):
         raise NotImplementedError("No such model type :", args.model_type)
     return model, loss_fn
 
+def get_embed_dim(embedder):
+    if(embedder=='uni_v1'):
+        embed_dim=1024
+    elif(embedder=='gigapath'):
+        embed_dim=1536
+    elif(embedder=='virchow'):
+        embed_dim=2560
+    return embed_dim
 
 def train(datasets, cur, args):
     """   

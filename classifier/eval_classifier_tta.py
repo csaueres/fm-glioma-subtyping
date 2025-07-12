@@ -13,7 +13,7 @@ from clam_funcs.utils.file_utils import save_pkl, load_pkl
 from clam_funcs.utils.utils import *
 from clam_funcs.dataset_generic import Generic_MIL_Dataset
 from model.eval_utils import Accuracy_Logger
-from model.model_utils_common import get_classifier
+from model.model_utils_common import get_classifier, get_embed_dim
 
 
 def get_results_for_fold(model, eval_data, f, args):
@@ -95,7 +95,7 @@ parser.add_argument('--eval_data_csv', type=str, default=None,
                     help='csv of items to be evaluated on')
 parser.add_argument('--split_dir', type=str, default=None, 
                     help='splits')
-parser.add_argument('--embed_dim', type=int, default=1024)
+parser.add_argument('--embedder', type=str, default='uni_v1')
 parser.add_argument('--k', type=int, default=5, help='number of folds (default: 10)')
 parser.add_argument('--exp_code', type=str, help='experiment code for saving results')
 parser.add_argument('--model_type', type=str,default="TODO")
@@ -103,7 +103,8 @@ parser.add_argument('--augments', nargs='+', help='which augmentations to use (f
 args = parser.parse_args()
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
+args.data_dir+=os.sep+args.embedder
+args.embed_dim = get_embed_dim()
 
 if __name__ == "__main__":
     args.n_class=3

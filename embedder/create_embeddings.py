@@ -33,7 +33,6 @@ def compute_feats_one_slide(output_path, loader, model, verbose = 0):
 
 	mode = 'w'
 	for count, data in enumerate(loader):
-		t1=time.time()
 		with torch.inference_mode(), torch.autocast(device_type="cuda", dtype=torch.float16):
 			#doubly batched by default collate (unless batch size is 1)
 			batch = data['img'].squeeze()
@@ -53,7 +52,6 @@ def compute_feats_one_slide(output_path, loader, model, verbose = 0):
 			asset_dict = {'features': features, 'coords': coords} #, 'pos_x':coords[:,0],'pos_y':coords[:,1]}
 			save_hdf5(output_path, asset_dict, attr_dict= None, mode=mode)
 			mode = 'a'
-			#print(f"Embedder needs {time.time()-t1}s for 1 batch\n")
 	
 	return output_path
 
@@ -64,11 +62,11 @@ parser.add_argument('--data_patches_dir', type=str, default='/home/millz/project
 parser.add_argument('--data_slide_dir', type=str, default='/media/millz/T7 Shield/data/histo_wsi')
 parser.add_argument('--slide_ext', type=str, default= '.svs')
 parser.add_argument('--csv_path', type=str, default=None)
-parser.add_argument('--model_name', type=str, default='uni_v1', choices=['uni_v1', 'conch_v1','jingsong_fm', 'gigapath', 'chief', 'virchow'])
+parser.add_argument('--embedder', type=str, default='uni_v1', choices=['uni_v1', 'conch_v1', 'gigapath', 'virchow'])
 parser.add_argument('--batch_size', type=int, default=256)
 parser.add_argument('--no_auto_skip', default=False, action='store_true')
 parser.add_argument('--target_patch_size', type=int, default=224)
-parser.add_argument('--augment_method', type=str, default='no_augment',choices=['no_augment','rc-pure','rc-mix','rc-up','macenko-norm','macenko-aug'])
+parser.add_argument('--augment_method', type=str, default='no_augment',choices=['no-augment','rc-pure','rc-mix','macenko-norm','macenko-aug'])
 parser.add_argument('--batch_randomize', default=False, action='store_true',help='whether to randomize augmenter before each batch (default: before every new slide)')
 args = parser.parse_args()
 
@@ -80,9 +78,7 @@ if __name__ == '__main__':
 		raise NotImplementedError("Must supply a csv of slides to process")
 
 	bags_dataset = Dataset_All_Bags(csv_path)
-	#no speedup observed when using second cuda device
-	loader_device = torch.device('cpu')#torch.device('cuda:0') #device
-	#TODO: change back to 8
+	loader_device = torch.device('cpu')
 	loader_kwargs = {'num_workers': 8, 'pin_memory': True} if loader_device.type == "cpu" else {}
 	print("Data Loading and Transforming Settings: ",loader_device)
 	print(loader_kwargs)
@@ -91,8 +87,8 @@ if __name__ == '__main__':
 	os.makedirs(os.path.join(args.feat_dir, 'h5_files'), exist_ok=True)
 	dest_files = os.listdir(os.path.join(args.feat_dir, 'h5_files'))
 
-	encoder = get_encoder(args.model_name)
-	if(args.augment_method=='no_augment'):
+	encoder = get_encoder(args.embedder)
+	if(args.augment_method=='no-augment'):
 		img_transforms = get_standard_transforms(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
 		augmenter_pointer = IdentityTransform()
 	else:
@@ -111,7 +107,7 @@ if __name__ == '__main__':
 			continue 
 		h5_file_path = os.path.join(args.data_patches_dir, 'patches', bag_name)
 		slide_file_path = os.path.join(args.data_slide_dir, slide_id+args.slide_ext)
-		output_path = os.path.join(args.feat_dir, 'h5_files', bag_name)
+		output_path = os.path.join(args.feat_dir,args.embedder,args.augment_method, 'h5_files', bag_name)
 
 		time_start = time.time()
 		wsi = openslide.open_slide(slide_file_path)
@@ -129,6 +125,5 @@ if __name__ == '__main__':
 		output_file_path = compute_feats_one_slide(output_path, loader = patch_loader, model = encoder, verbose = 1)
 		time_elapsed = time.time() - time_start
 		print('\ncomputing features for {} took {} s'.format(output_file_path, time_elapsed))
-	#augmenter_pointer.augmenter.save_cache('stain_matrices/vahadane-cache_tcga.pkl')
 
 

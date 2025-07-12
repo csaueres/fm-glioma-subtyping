@@ -8,7 +8,7 @@ import math
 # internal imports
 from clam_funcs.utils.file_utils import save_pkl, load_pkl
 from clam_funcs.utils.utils import *
-from model.model_utils_common import train
+from model.model_utils_common import train,get_embed_dim
 from clam_funcs.dataset_generic import Generic_MIL_Dataset
 
 import pandas as pd
@@ -16,9 +16,6 @@ import numpy as np
 
 
 def main(args):
-    # create results directory if necessary
-    if not os.path.isdir(args.results_dir):
-        os.mkdir(args.results_dir)
 
     if args.k_start == -1:
         start = 0
@@ -63,9 +60,9 @@ def main(args):
 
 # Generic training settings
 parser = argparse.ArgumentParser(description='Configurations for WSI Training')
-parser.add_argument('--data_root_dir', type=str, default=None, 
+parser.add_argument('--data_dir', type=str, default=None, 
                     help='data directory')
-parser.add_argument('--embed_dim', type=int, default=1024)
+parser.add_argument('--embedder', type=str, default='uni_v1')
 parser.add_argument('--max_epochs', type=int, default=200,
                     help='maximum number of epochs to train (default: 200)')
 parser.add_argument('--n_block', type=int, default=4)
@@ -196,6 +193,9 @@ settings.update({'split_dir': args.split_dir})
 with open(args.results_dir + '/experiment_{}.txt'.format(args.exp_code), 'w') as f:
     print(settings, file=f)
 f.close()
+
+args.data_dir+=os.sep+args.embedder
+args.embed_dim = get_embed_dim()
 
 print("################# Settings ###################")
 for key, val in settings.items():
