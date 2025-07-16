@@ -5,7 +5,7 @@ This repository accompanies *Leveraging Foundation Models for Glioma Classificat
 ## Setup
 
 ### Installation
-TODO
+Coming soon!
 
 ### Download FMs
 Please request access to the foundation models from their respective sources.
