@@ -1,5 +1,5 @@
 # Repository for Glioma Classification using CompPath FMs.
-This repository accompanies *Leveraging Foundation Models for Glioma Classification* (under review).
+This repository accompanies *From Histology to Diagnosis: Leveraging Foundation Models for Glioma Classification* (under review).
 
 
 ## Setup
@@ -12,6 +12,7 @@ Please request access to the foundation models from their respective sources.
     [UNI](https://huggingface.co/MahmoodLab/UNI)
     [GigaPath](https://huggingface.co/prov-gigapath/prov-gigapath)
     [Virchow](https://huggingface.co/paige-ai/Virchow)
+Copy your HuggingFace Token into the embedder/TOKENS.py file to automatically download model weights. 
 
 ### Download Data
 TCGA data can be downloaded from https://portal.gdc.cancer.gov.
