@@ -9,6 +9,9 @@ qc_scripts/
 out_temp
 **/TOKENS.py
 embedder/TOKENS.py
+CLAM
+env2.yml
+env3.yml
 
 
 #Default config
