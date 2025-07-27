@@ -83,9 +83,11 @@ if __name__ == '__main__':
 	print("Data Loading and Transforming Settings: ",loader_device)
 	print(loader_kwargs)
 	
-	os.makedirs(args.feat_dir, exist_ok=True)
-	os.makedirs(os.path.join(args.feat_dir, 'h5_files'), exist_ok=True)
-	dest_files = os.listdir(os.path.join(args.feat_dir, 'h5_files'))
+	# os.makedirs(args.feat_dir, exist_ok=True)
+	# os.makedirs(os.path.join(args.feat_dir, 'h5_files'), exist_ok=True)
+	out_dir = os.path.join(args.feat_dir,args.embedder,args.augment_method, 'h5_files')
+	os.makedirs(out_dir,exist_ok=True)
+	dest_files = os.listdir(out_dir)
 
 	encoder = get_encoder(args.embedder)
 	if(args.augment_method=='no-augment'):

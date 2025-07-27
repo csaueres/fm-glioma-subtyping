@@ -95,7 +95,7 @@ def summary(model, loader, n_class,case_level):
     return slide_results, acc_logger, (test_error, auc, ba, mcc)
 
 parser = argparse.ArgumentParser(description='Configurations for WSI Training')
-parser.add_argument('--data_root_dir', type=str, default=None, 
+parser.add_argument('--data_dir', type=str, default=None, 
                     help='data directory')
 parser.add_argument('--eval_data_csv', type=str, default=None, 
                     help='csv of items to be evaluated on')
@@ -112,7 +112,7 @@ args = parser.parse_args()
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 args.data_dir+=os.sep+args.embedder
-args.embed_dim = get_embed_dim()
+args.embed_dim = get_embed_dim(args.embedder)
 
 
 if __name__ == "__main__":
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     args.drop_out=0.0
     args.return_attn=False
     dataset = Generic_MIL_Dataset(csv_path = args.eval_data_csv,
-                            data_dir= args.data_root_dir,
+                            data_dir= args.data_dir,
                             shuffle = False, 
                             seed = 7, 
                             print_info = True,

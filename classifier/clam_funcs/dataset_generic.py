@@ -204,7 +204,7 @@ class Generic_WSI_Classification_Dataset(Dataset):
 				split = Generic_Split(df_slice, data_dir=self.data_dir, num_classes=self.num_classes,augments=self.augments, patch_frac=self.patch_frac)
 			else:
 				#if the augment is a normalize, then want to apply it to test data as well
-				eval_aug=[self.augments[0]] if len(self.augments)==1 else ['pp']
+				eval_aug=[self.augments[0]] if len(self.augments)==1 else ['no-augment']
 				split = Generic_Split(df_slice, data_dir=self.data_dir, num_classes=self.num_classes, augments=eval_aug)
 		else:
 			split = None

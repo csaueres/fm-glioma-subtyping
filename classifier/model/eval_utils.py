@@ -139,16 +139,5 @@ def custom_auc(labels,probs,n_class):
     if n_class == 2:
         auc = roc_auc_score(labels, probs[:, 1])
     else:
-        # aucs = []
-        # binary_labels = label_binarize(labels, classes=[i for i in range(n_class)])
-        # for class_idx in range(n_class):
-        #     if class_idx in labels:
-        #         fpr, tpr, _ = roc_curve(binary_labels[:, class_idx], probs[:, class_idx])
-        #         aucs.append(calc_auc(fpr, tpr))
-        #     else:
-        #         aucs.append(float('nan'))
-
-        # auc = np.nanmean(np.array(aucs))
-        #produces the same output, dunno why they made it complicated
         auc = roc_auc_score(labels, probs, multi_class='ovr')
     return auc

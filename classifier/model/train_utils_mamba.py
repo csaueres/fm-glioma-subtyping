@@ -101,22 +101,11 @@ def validate(cur, epoch, model, loader, n_class, early_stopping = None, writer =
             val_error += error
     all_logits = np.asarray(all_logits); all_labels = np.asarray(all_labels)
     val_loss = loss_fn(torch.FloatTensor(all_logits),torch.nn.functional.one_hot(torch.LongTensor(all_labels),n_class).float()).item()
-    # print(torch.FloatTensor(all_logits))
-    # print(torch.LongTensor(all_labels))
-    # print(torch.nn.functional.one_hot(torch.LongTensor(all_labels),n_class).float())
-    #val_loss = loss_fn(torch.FloatTensor(all_logits),torch.LongTensor(all_labels)).item()
     val_error /= len(loader)
-    #dont need to divide because BCE is already being averaged and MCC is computed datasetwide
-    # val_loss /= len(loader)
 
     #all_probs = F.softmax(all_logits,dim=1)
     all_probs = np.exp(all_logits)/np.sum(np.exp(all_logits),axis=1,keepdims=True)
     auc = custom_auc(all_labels,all_probs,n_class)
-    # if n_class == 2:
-    #     auc = roc_auc_score(all_labels, all_probs[:, 1])
-    
-    # else:
-    #     auc = roc_auc_score(all_labels, all_probs, multi_class='ovr')
     
     
     if writer:

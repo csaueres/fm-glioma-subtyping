@@ -48,7 +48,7 @@ After patching, we can use the FMs to generate an embedding for each patch. This
 Embeddings will be saved according to the following structure OUT_DIR/embedder/augment_method/h5_files/slide_xxx.h5. For training and evaluating models, the embedding root directory should only be EMBEDDING_DIR.
 
 ```
-python create_embeddings.py --embedder <uni_v1,gigapath,virchow> --feat_dir EMBEDDING_DIR --augment_method <no-augment,rc-mix,macenko-norm> --data_patches_dir PATCHES_DIR --data_slide_dir RAW_DATA_DIR --slide_ext .svs --csv_path METADATA.csv --batch_size 256
+python create_embeddings.py --embedder <uni_v1,gigapath,virchow> --feat_dir EMBEDDING_DIR --augment_method <no-augment,rc-mix,rc-pure,macenko-norm> --data_patches_dir PATCHES_DIR --data_slide_dir RAW_DATA_DIR --slide_ext .svs --csv_path METADATA.csv --batch_size 256
 ```
 
 ### Train Classifier
