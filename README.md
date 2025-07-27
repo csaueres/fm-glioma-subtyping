@@ -5,7 +5,10 @@ This repository accompanies *From Histology to Diagnosis: Leveraging Foundation 
 ## Setup
 
 ### Installation
-Coming soon!
+Required packages are listed in env.yml. An conda environment can be created by running the following command:
+```
+conda env create -n fmgs -f env.yml
+```
 
 ### Download FMs
 Please request access to the foundation models from their respective sources.
