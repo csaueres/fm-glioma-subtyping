@@ -1,9 +1,5 @@
-from __future__ import print_function
-
 import argparse
-import pdb
 import os
-import math
 
 # internal imports
 from clam_funcs.utils.file_utils import save_pkl, load_pkl
@@ -14,6 +10,7 @@ from clam_funcs.dataset_generic import Generic_MIL_Dataset
 import pandas as pd
 import numpy as np
 
+device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def main(args):
 
@@ -95,7 +92,8 @@ parser.add_argument('--patch_frac',type=float,default=1.0,help='what fraction of
 parser.add_argument('--augments', nargs='+', help='which augmentations to use (for none use og)', required=True)
 args = parser.parse_args()
 args.return_attn=False
-device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
+args.data_dir+=os.sep+args.embedder
+args.embed_dim = get_embed_dim(args.embedder)
 
 def seed_torch(seed=7):
     import random
@@ -133,7 +131,7 @@ print('\nLoad Dataset')
 if args.task == 'idh_1p19q_class':
     args.n_class=3
     dataset = Generic_MIL_Dataset(csv_path = args.csv,
-                            data_dir= os.path.join(args.data_root_dir, ''),
+                            data_dir= args.data_dir,
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,
@@ -145,7 +143,7 @@ if args.task == 'idh_1p19q_class':
 elif args.task == 'idh_class':
     args.n_class=2
     dataset = Generic_MIL_Dataset(csv_path = args.csv,
-                            data_dir= os.path.join(args.data_root_dir, ''),
+                            data_dir= args.data_dir,
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,
@@ -155,7 +153,7 @@ elif args.task == 'idh_class':
 elif args.task == '1p19q_class':
     args.n_class=2
     dataset = Generic_MIL_Dataset(csv_path = args.csv,
-                            data_dir= os.path.join(args.data_root_dir, ''),
+                            data_dir= args.data_dir,
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,
@@ -165,7 +163,7 @@ elif args.task == '1p19q_class':
 elif args.task == 'dataset_id':
     args.n_class=3
     dataset = Generic_MIL_Dataset(csv_path = args.csv,
-                            data_dir= os.path.join(args.data_root_dir, ''),
+                            data_dir= args.data_dir,
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,
@@ -177,12 +175,8 @@ elif args.task == 'dataset_id':
 else:
     raise NotImplementedError
     
-if not os.path.isdir(args.results_dir):
-    os.mkdir(args.results_dir)
-
 args.results_dir = os.path.join(args.results_dir, str(args.exp_code))
-if not os.path.isdir(args.results_dir):
-    os.mkdir(args.results_dir)
+os.makedirs(args.results_dir,exist_ok=True)
 
 print('split_dir: ', args.split_dir)
 assert os.path.isdir(args.split_dir)
@@ -194,8 +188,6 @@ with open(args.results_dir + '/experiment_{}.txt'.format(args.exp_code), 'w') as
     print(settings, file=f)
 f.close()
 
-args.data_dir+=os.sep+args.embedder
-args.embed_dim = get_embed_dim()
 
 print("################# Settings ###################")
 for key, val in settings.items():

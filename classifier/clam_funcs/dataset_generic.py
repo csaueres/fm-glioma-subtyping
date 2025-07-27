@@ -305,56 +305,32 @@ class Generic_MIL_Dataset(Generic_WSI_Classification_Dataset):
 	
 		super(Generic_MIL_Dataset, self).__init__(**kwargs)
 		self.data_dir = data_dir
-		self.use_h5 = False
-		self.concatenate=False #if self.data_dir[:-3]=="20x" else True
-		# print("INFO: Concatenating Features: ",self.concatenate)
+		self.use_h5 = True
 		self.rng = np.random.default_rng(7)
 
 	def load_from_h5(self, toggle):
 		self.use_h5 = toggle
 
-	def toggle_concat(self, toggle):
-		self.concatenate=toggle
-
 	def __getitem__(self, idx):
 		slide_id = self.slide_data['slide_id'][idx]
 		label = self.slide_data['label'][idx]
 
-		if not self.use_h5:
-			if self.data_dir:
-				full_path = os.path.join(self.data_dir, 'pt_files', '{}.pt'.format(slide_id))
-				features = torch.load(full_path)
-				return features, label
-			else:
-				return slide_id, label
-
+		#get a random augmented variant of the requested slide
+		if(len(self.augments)==1):
+			aug=self.augments[0]
 		else:
-			#get a random augmented variant of the requested slide
-			if(len(self.augments)==1):
-				aug=self.augments[0]
-			else:
-				aug=self.rng.choice(self.augments)
-			if self.concatenate:
-				try:
-					features = get_concated_feats(self.data_dir,aug,slide_id,self.rng,self.patch_frac)
-				except ValueError as e:
-					#for like 5 cases, gigapath has one more patch than the other two
-					print("Concatention Error ", slide_id)
-					print(e)
-					return self.__getitem__(idx+1)
-			else:
-				features = get_feats(self.data_dir,aug,slide_id,self.rng,self.patch_frac)
-			features = torch.from_numpy(features)
-			# print(features.shape)
-			coords=None
-			return features, label, coords
+			aug=self.rng.choice(self.augments)
+
+		features = get_feats(self.data_dir,aug,slide_id,self.rng,self.patch_frac)
+		features = torch.from_numpy(features)
+		# print(features.shape)
+		coords=None
+		return features, label, coords
 
 
 class Generic_Split(Generic_MIL_Dataset):
 	def __init__(self, slide_data, data_dir=None, num_classes=2,augments=['og'],patch_frac=1.0):
-		self.use_h5 = False
-		self.concatenate=False# if data_dir[:-3]=="20x" else True
-		print("INFO: Concatenating Features: ",self.concatenate)
+		self.use_h5 = True
 		self.slide_data = slide_data
 		self.data_dir = data_dir
 		self.rng = np.random.default_rng(7)
@@ -388,11 +364,3 @@ def get_feats(data_dir,aug,slide_id,rng,patch_frac):
 		#coords = coords[subset_indices]
 	return features
 
-
-def get_concated_feats(data_dir,aug,slide_id,rng,patch_frac):
-	all_feats = []
-	for fm in ['uni_20x','gigapath_20x','virchow_20x']:
-		full_path = os.path.join(data_dir,fm)
-		all_feats.append(get_feats(full_path,aug,slide_id,rng,patch_frac))
-	# print(f"{all_feats[0].shape}, {all_feats[1].shape}, {all_feats[2].shape}")
-	return np.concatenate(all_feats,axis=1)
