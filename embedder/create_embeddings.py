@@ -26,6 +26,16 @@ def viz_subbatch(batch_tensor):
 		#axs[i].set_title("Target Patch")
 	plt.show()
 
+def get_feats_virchow(model,batch):
+	out = model(batch)
+	features = torch.cat([out[:, 0], out[:, 1:].mean(1)], dim=-1)
+	return features
+
+def get_feats_musk(model,batch):
+	out = model(batch,with_head=False,out_norm=False,ms_aug=True,return_global=True)
+	return out[0]
+
+
 
 def compute_feats_one_slide(output_path, loader, model, verbose = 0):
 	if verbose > 0:
@@ -40,9 +50,12 @@ def compute_feats_one_slide(output_path, loader, model, verbose = 0):
 			coords = data['coord'].squeeze(0).numpy().astype(np.int32)
 			batch = batch.to(device, non_blocking=True)
 			try:
-				out = model(batch)
-				#thanks virchow
-				features = torch.cat([out[:, 0], out[:, 1:].mean(1)], dim=-1) if model.name=='virchow' else out
+				if(model.name=='virchow'):
+					features = get_feats_virchow(model,batch)
+				elif(model.name=='musk'):
+					features = get_feats_musk(model,batch)
+				else:
+					features = model(batch)
 			except Exception as e:
 				print(e)
 				print("Embedder failed on batch, likely batch size of 1, ignored")
@@ -62,10 +75,9 @@ parser.add_argument('--data_patches_dir', type=str, default='/home/millz/project
 parser.add_argument('--data_slide_dir', type=str, default='/media/millz/T7 Shield/data/histo_wsi')
 parser.add_argument('--slide_ext', type=str, default= '.svs')
 parser.add_argument('--csv_path', type=str, default=None)
-parser.add_argument('--embedder', type=str, default='uni_v1', choices=['uni_v1', 'conch_v1', 'gigapath', 'virchow'])
+parser.add_argument('--embedder', type=str, default='uni_v1', choices=['uni_v1', 'conch_v1', 'gigapath', 'virchow','musk','hoptimus-mini'])
 parser.add_argument('--batch_size', type=int, default=256)
 parser.add_argument('--no_auto_skip', default=False, action='store_true')
-parser.add_argument('--target_patch_size', type=int, default=224)
 parser.add_argument('--augment_method', type=str, default='no_augment',choices=['no-augment','rc-pure','rc-mix','macenko-norm','macenko-aug'])
 parser.add_argument('--batch_randomize', default=False, action='store_true',help='whether to randomize augmenter before each batch (default: before every new slide)')
 args = parser.parse_args()
@@ -91,10 +103,10 @@ if __name__ == '__main__':
 
 	encoder = get_encoder(args.embedder)
 	if(args.augment_method=='no-augment'):
-		img_transforms = get_standard_transforms(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
+		img_transforms = get_standard_transforms(args.embedder)
 		augmenter_pointer = IdentityTransform()
 	else:
-		img_transforms, augmenter_pointer = get_random_transforms(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225],method=args.augment_method,batch_randomize=args.batch_randomize,device=loader_device)
+		img_transforms, augmenter_pointer = get_random_transforms(args.embedder,method=args.augment_method,batch_randomize=args.batch_randomize,device=loader_device)
 	_ = encoder.eval()
 	encoder = encoder.to(device)
 	total = len(bags_dataset)

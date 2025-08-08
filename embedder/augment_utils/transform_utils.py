@@ -2,17 +2,25 @@ import numpy as np
 import torch
 from torchvision.transforms import v2
 
+import torchvision
+from timm.data.constants import IMAGENET_INCEPTION_MEAN, IMAGENET_INCEPTION_STD, IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+
 from augment_utils.augment_utils import StainAugment, RandomConvAugment
 
 from time import time
 
-def get_standard_transforms(mean, std):
+def get_standard_transforms(model):
+	if(model=='musk'):
+		mean = IMAGENET_INCEPTION_MEAN; std = IMAGENET_INCEPTION_STD
+		resize_shape=384;crop_shape=384
+	else:
+		mean = IMAGENET_DEFAULT_MEAN; std = IMAGENET_DEFAULT_STD
+		resize_shape=256;crop_shape=224
 	trsforms =  v2.Compose([
 	v2.ToImage(),
     v2.ToDtype(torch.uint8, scale=True), 	#already uint8, but just to be sure
-	#v2.Resize((256,256),interpolation=v2.InterpolationMode.BILINEAR),
-	v2.Resize((256,256),interpolation=v2.InterpolationMode.BICUBIC),
-	v2.CenterCrop(224),
+	v2.Resize(resize_shape,interpolation=v2.InterpolationMode.BICUBIC),
+	v2.CenterCrop(crop_shape),
     v2.ToDtype(torch.float32, scale=True),
 	lambda x: torch.stack(x),
 	v2.Normalize(mean, std)
@@ -21,15 +29,20 @@ def get_standard_transforms(mean, std):
 	return trsforms
 
 
-def get_random_transforms(mean,std,method,batch_randomize,device):
+def get_random_transforms(model,method,batch_randomize,device):
+	if(model=='musk'):
+		mean = IMAGENET_INCEPTION_MEAN; std = IMAGENET_INCEPTION_STD
+		resize_shape=384;crop_shape=384
+	else:
+		mean = IMAGENET_DEFAULT_MEAN; std = IMAGENET_DEFAULT_STD
+		resize_shape=256;crop_shape=224
 	custom_augmenter = ConsistentStainTransform(method,batch_randomize,device)
 	trsforms =  v2.Compose([
 	v2.ToImage(),  # Convert to tensor, only needed if you had a PIL image, possibly also .ToPureTensor
 	lambda x: torch.stack(x).to(device),
     v2.ToDtype(torch.uint8, scale=True),  # optional, most input are already uint8 at this point
-    #v2.Resize((256,256),interpolation=v2.InterpolationMode.BILINEAR),
-	v2.Resize((256,256),interpolation=v2.InterpolationMode.BICUBIC),
-	v2.RandomCrop(224),
+	v2.Resize(resize_shape,interpolation=v2.InterpolationMode.BICUBIC),
+	v2.RandomCrop(crop_shape),
     v2.ToDtype(torch.float32, scale=True),  # Normalize expects float input
 	custom_augmenter,
     v2.Normalize(mean=mean, std=std,inplace=True)
