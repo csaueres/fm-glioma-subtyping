@@ -44,6 +44,8 @@ def get_embed_dim(embedder):
         embed_dim=1536
     elif(embedder=='virchow'):
         embed_dim=2560
+    elif(embedder=='musk'):
+        embed_dim=1024
     else:
         raise NotImplementedError("No such embedder :", embedder)
     return embed_dim

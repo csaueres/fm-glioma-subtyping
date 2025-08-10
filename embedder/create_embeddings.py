@@ -32,7 +32,7 @@ def get_feats_virchow(model,batch):
 	return features
 
 def get_feats_musk(model,batch):
-	out = model(batch,with_head=False,out_norm=False,ms_aug=True,return_global=True)
+	out = model(batch,with_head=False,out_norm=False,ms_aug=False,return_global=True)
 	return out[0]
 
 
