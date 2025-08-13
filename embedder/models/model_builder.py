@@ -26,6 +26,18 @@ def get_encoder(model_name):
     elif(model_name)=='musk':
         model = timm.create_model("musk_large_patch16_384")
         utils.load_model_and_may_interpolate("hf_hub:xiangjx/musk", model, 'model|module', '')
+    elif(model_name)=='retccl':
+        model = ResNet.resnet50(num_classes=128,mlp=False, two_branch=False, normlinear=True)
+        pretext_model = torch.load('models/retccl/best_ckpt.pth')
+        model.fc = torch.nn.Identity()
+        model.load_state_dict(pretext_model, strict=True)
+    elif(model_name)=='h0-mini':
+        model = timm.create_model(
+            "hf-hub:bioptimus/H0-mini",
+            pretrained=True,
+            mlp_layer=SwiGLUPacked,
+            act_layer=torch.nn.SiLU,
+        )
     else:
         raise NotImplementedError('model {} not implemented'.format(model_name))
     

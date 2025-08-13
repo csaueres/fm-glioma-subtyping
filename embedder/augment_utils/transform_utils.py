@@ -10,12 +10,7 @@ from augment_utils.augment_utils import StainAugment, RandomConvAugment
 from time import time
 
 def get_standard_transforms(model):
-	if(model=='musk'):
-		mean = IMAGENET_INCEPTION_MEAN; std = IMAGENET_INCEPTION_STD
-		resize_shape=384;crop_shape=384
-	else:
-		mean = IMAGENET_DEFAULT_MEAN; std = IMAGENET_DEFAULT_STD
-		resize_shape=256;crop_shape=224
+	mean,std,resize_shape,crop_shape=get_normalization_stats(model)
 	trsforms =  v2.Compose([
 	v2.ToImage(),
     v2.ToDtype(torch.uint8, scale=True), 	#already uint8, but just to be sure
@@ -30,12 +25,7 @@ def get_standard_transforms(model):
 
 
 def get_random_transforms(model,method,batch_randomize,device):
-	if(model=='musk'):
-		mean = IMAGENET_INCEPTION_MEAN; std = IMAGENET_INCEPTION_STD
-		resize_shape=384;crop_shape=384
-	else:
-		mean = IMAGENET_DEFAULT_MEAN; std = IMAGENET_DEFAULT_STD
-		resize_shape=256;crop_shape=224
+	mean,std,resize_shape,crop_shape=get_normalization_stats(model)
 	custom_augmenter = ConsistentStainTransform(method,batch_randomize,device)
 	trsforms =  v2.Compose([
 	v2.ToImage(),  # Convert to tensor, only needed if you had a PIL image, possibly also .ToPureTensor
@@ -114,3 +104,18 @@ class IdentityTransform(object):
 	
 	def reset(self,slide_id):
 		return
+
+def get_normalization_stats(model:str):
+	if(model=='musk'):
+		mean = IMAGENET_INCEPTION_MEAN; std = IMAGENET_INCEPTION_STD
+		resize_shape=384;crop_shape=384
+	elif(model=='retccl'):
+		mean = IMAGENET_DEFAULT_MEAN; std = IMAGENET_DEFAULT_STD
+		resize_shape=256;crop_shape=256
+	elif(model=='h0-mini'):
+		mean = [0.7072, 0.5787, 0.7036]; std = [0.2119, 0.2301, 0.1775]
+		resize_shape=224;crop_shape=224
+	else:
+		mean = IMAGENET_DEFAULT_MEAN; std = IMAGENET_DEFAULT_STD
+		resize_shape=256;crop_shape=224
+	return mean,std,resize_shape,crop_shape

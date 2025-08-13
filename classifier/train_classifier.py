@@ -26,7 +26,7 @@ def main(args):
 
     all_val_auc = []
     all_val_acc = []
-    all_val_f1 = []
+    all_val_ba = []
     all_val_mcc = []
     folds = np.arange(start, end)
     for i in folds:
@@ -38,8 +38,8 @@ def main(args):
         train_dataset.load_from_h5(True)
         val_dataset.load_from_h5(True)
         test_dataset.load_from_h5(True)
-        results, val_acc, val_auc, val_f1, val_mcc  = train(datasets, i, args)
-        all_val_f1.append(val_f1)
+        results, val_acc, val_auc, val_ba, val_mcc  = train(datasets, i, args)
+        all_val_ba.append(val_ba)
         all_val_auc.append(val_auc)
         all_val_mcc.append(val_mcc)
         all_val_acc.append(val_acc)
@@ -48,7 +48,7 @@ def main(args):
         save_pkl(filename, results)
 
     final_df = pd.DataFrame({'folds': folds, 'val_acc': all_val_acc, 
-        'val_auc': all_val_auc, 'val_f1': all_val_f1, 'val_mcc' : all_val_mcc})
+        'val_auc': all_val_auc, 'val_ba': all_val_ba, 'val_mcc' : all_val_mcc})
 
     if len(folds) != args.k:
         save_name = 'summary_partial_{}_{}.csv'.format(start, end)

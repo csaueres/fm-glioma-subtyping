@@ -26,9 +26,9 @@ def viz_subbatch(batch_tensor):
 		#axs[i].set_title("Target Patch")
 	plt.show()
 
-def get_feats_virchow(model,batch):
+def get_feats_patch_concat(model,batch):
 	out = model(batch)
-	features = torch.cat([out[:, 0], out[:, 1:].mean(1)], dim=-1)
+	features = torch.cat([out[:, 0], out[:, model.num_prefix_tokens:].mean(1)], dim=-1)
 	return features
 
 def get_feats_musk(model,batch):
@@ -50,8 +50,8 @@ def compute_feats_one_slide(output_path, loader, model, verbose = 0):
 			coords = data['coord'].squeeze(0).numpy().astype(np.int32)
 			batch = batch.to(device, non_blocking=True)
 			try:
-				if(model.name=='virchow'):
-					features = get_feats_virchow(model,batch)
+				if(model.name=='virchow' or model.name=='h0-mini'):
+					features = get_feats_patch_concat(model,batch)
 				elif(model.name=='musk'):
 					features = get_feats_musk(model,batch)
 				else:

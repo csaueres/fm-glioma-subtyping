@@ -46,6 +46,10 @@ def get_embed_dim(embedder):
         embed_dim=2560
     elif(embedder=='musk'):
         embed_dim=1024
+    elif(embedder=='retccl'):
+        embed_dim=2048
+    elif(embedder=='h0-mini'):
+        embed_dim=1536
     else:
         raise NotImplementedError("No such embedder :", embedder)
     return embed_dim
