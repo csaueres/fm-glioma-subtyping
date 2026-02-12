@@ -3,7 +3,6 @@
 jobs/
 scripts/
 job_scripts/
-embedder/stain_matrices/
 qc_scripts/
 */output/*
 out_temp

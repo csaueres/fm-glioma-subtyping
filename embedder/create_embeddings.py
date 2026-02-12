@@ -75,7 +75,7 @@ parser.add_argument('--data_patches_dir', type=str, default='/home/millz/project
 parser.add_argument('--data_slide_dir', type=str, default='/media/millz/T7 Shield/data/histo_wsi')
 parser.add_argument('--slide_ext', type=str, default= '.svs')
 parser.add_argument('--csv_path', type=str, default=None)
-parser.add_argument('--embedder', type=str, default='uni_v1', choices=['uni_v1', 'conch_v1', 'gigapath', 'virchow','musk','hoptimus-mini'])
+parser.add_argument('--embedder', type=str, default='uni_v1', choices=['uni_v1', 'conch_v1', 'gigapath', 'virchow','musk','h0-mini'])
 parser.add_argument('--batch_size', type=int, default=256)
 parser.add_argument('--no_auto_skip', default=False, action='store_true')
 parser.add_argument('--augment_method', type=str, default='no_augment',choices=['no-augment','rc-pure','rc-mix','macenko-norm','macenko-aug'])
